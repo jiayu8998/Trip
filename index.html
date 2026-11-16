@@ -732,7 +732,7 @@ document.addEventListener('input',function(e){
   var f=e.target; if(!f.dataset||!f.dataset.info) return;
   var k=f.dataset.info;
   info[k]=f.value; save(K_INFO,info); updateMap(); if(k==='stay_addr'||k==='stay_name') mapRefresh();
-  if(SYNC_KEYS.indexOf(k)>-1){ infoT[k]=Date.now(); save(K_INFOT,infoT); pend.info=++pend.v; savePend(); clearTimeout(infoTimer); infoTimer=setTimeout(function(){ flushPending().catch(function(){ setPill('off','變更尚未上傳'); }); },1200); }
+  if(SYNC_KEYS.indexOf(k)>-1){ infoT[k]=Date.now(); save(K_INFOT,infoT); pend.info=++pend.v; savePend(); clearTimeout(infoTimer); infoTimer=setTimeout(function(){ flushPending().then(markSynced).catch(function(e){ lastErr=errMsg(e); setPill('off','變更尚未上傳'); }); },1200); }
 });
 updateMap();
 
@@ -1001,9 +1001,16 @@ function flushPending(){
   flushing=Promise.all(jobs).then(function(){ flushing=null; },function(e){ flushing=null; throw e; });
   return flushing;
 }
+var lastErr='';
+function errMsg(e){ return (e&&e.message)?e.message:String(e||''); }
+function markSynced(){
+  if(hasPending()) return;
+  var n=new Date(); setPill('ok','已同步 '+('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2));
+}
 function afterEdit(){
   if(!SYNC_URL){ toast('已儲存在這支手機'); return; }
-  flushPending().then(function(){ toast('已儲存並同步'); }).catch(function(){ toast('已存在這支手機，連線後會自動上傳'); setPill('off','變更尚未上傳'); });
+  flushPending().then(function(){ markSynced(); toast('已儲存並同步'); })
+  .catch(function(e){ lastErr=errMsg(e); toast('已存在這支手機，連線後會自動上傳'); setPill('off','變更尚未上傳'); });
 }
 function markAllPending(){
   save(K_PLAN,daysToRemote());
@@ -1191,9 +1198,16 @@ function sync(){
     var n=new Date(); setPill('ok','已同步 '+('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2));
     return flushPending().then(fetchPlan).catch(function(){});
   })
-  .catch(function(){ setPill('off','離線，稍後同步'); })
+  .catch(function(e){ lastErr=errMsg(e); setPill('off','離線，稍後同步'); })
   .then(function(){ if(hasPending()) setPill('off','變更尚未上傳'); syncing=false; if(dirty){ dirty=false; setTimeout(sync,300); } });
 }
+pill.style.cursor='pointer'; pill.setAttribute('role','button'); pill.setAttribute('tabindex','0');
+function pillTap(){
+  if(pill.classList.contains('off')) toast('上傳失敗'+(lastErr?'（'+lastErr+'）':'')+'。請確認 Apps Script 已部署新版本，且存取權是「所有人」。正在重試…');
+  sync();
+}
+pill.addEventListener('click',pillTap);
+pill.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pillTap(); } });
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) sync(); });
 window.addEventListener('online',sync);
 window.addEventListener('offline',function(){ setPill('off','離線，稍後同步'); });
