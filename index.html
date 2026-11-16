@@ -108,6 +108,19 @@ button,input,textarea{font:inherit;color:inherit}
 .tb p{font-size:14px;opacity:.85}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .tag{font-size:12.5px;border:2.5px solid var(--ink);border-radius:999px;padding:0 10px;line-height:1.5}
+.tag.m{background:var(--paper);text-decoration:none;color:inherit}
+.mapfilter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.mf{border:var(--line);border-radius:999px;background:var(--paper);padding:0 14px;cursor:pointer;font-size:14px;line-height:1.8}
+.mf[aria-pressed="true"]{background:var(--yellow)}
+.mapbox{position:relative;z-index:0;isolation:isolate;height:340px;border:var(--line);border-radius:22px;overflow:hidden;background:var(--paper)}
+.leaflet-container{font-family:inherit!important}
+.pin{width:32px;height:32px;border:3px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:14px;line-height:1;color:var(--ink);background:var(--coral)}
+.pin.d2{background:var(--aqua)} .pin.d3{background:var(--green)}
+.pin.h{background:var(--yellow);border-radius:10px}
+.leaflet-popup-content-wrapper{border:3px solid var(--ink);border-radius:16px;box-shadow:none;background:var(--paper);color:var(--ink)}
+.leaflet-popup-tip{border:3px solid var(--ink);box-shadow:none;background:var(--paper)}
+.leaflet-popup-content{margin:10px 14px;font-size:14px;line-height:1.5}
+.leaflet-popup-content a{color:var(--ink)}
 .tag.g{background:var(--green)} .tag.a{background:var(--aqua)} .tag.c{background:var(--coral)} .tag.y{background:var(--yellow)}
 
 /* ---------- 清單 ---------- */
@@ -213,7 +226,7 @@ body.lock{overflow:hidden}
       <div class="nav-r"><button type="button" class="pill" id="editBtn" aria-pressed="false">✎ 編輯</button><span class="pill local" id="pill">僅存本機</span></div>
     </div>
     <nav class="links" id="links" aria-label="頁面導覽">
-      <a href="#home">首頁</a><a href="#flight">航班</a><a href="#plan">行程</a><a href="#todo">待辦</a><a href="#stay">住宿</a><a href="#pre">出發前</a><a href="#pack">行李</a>
+      <a href="#home">首頁</a><a href="#flight">航班</a><a href="#plan">行程</a><a href="#map">地圖</a><a href="#todo">待辦</a><a href="#stay">住宿</a><a href="#pre">出發前</a><a href="#pack">行李</a>
     </nav>
   </div>
 </header>
@@ -304,7 +317,7 @@ body.lock{overflow:hidden}
       <g fill="#3E3A39"><circle cx="52" cy="28" r="2.5"/><circle cx="62" cy="28" r="2.5"/><circle cx="72" cy="28" r="2.5"/><circle cx="82" cy="28" r="2.5"/></g>
     </g></svg>
   </div>
-  <p class="sub">還沒有航班資料，先留空，之後直接在下面欄位填寫。</p>
+  <p class="sub">還沒有航班資料，先留空，之後直接在下面欄位填寫，家人的手機會自動同步。</p>
 
   <div class="leg">
     <div class="leg-h"><span class="chip c-coral">去程</span><span>12/25（五）</span></div>
@@ -339,7 +352,7 @@ body.lock{overflow:hidden}
       <label class="field"><span>航班編號</span><input data-info="back_no" placeholder="例：AB124"></label>
     </div>
   </div>
-  <p class="priv">航班與住宿欄位只存在這支手機的瀏覽器，不會上傳同步。</p>
+  <p class="priv">航班資料會同步給所有家人。</p>
 </section>
 
 <!-- ================= 每日行程 ================= -->
@@ -387,9 +400,24 @@ body.lock{overflow:hidden}
   <div class="addrow ed"><button type="button" class="btn" data-act="add-item">＋ 新增景點</button></div>
 </section>
 
+<!-- ================= 地圖 ================= -->
+<section id="map" class="card" data-sec>
+  <div class="sec-h">
+    <h2><b>3</b>地圖</h2>
+    <svg viewBox="0 0 60 70" style="width:44px" aria-hidden="true"><g class="s-bob">
+      <path d="M30 66C30 66 8 42 8 27a22 22 0 0 1 44 0c0 15-22 39-22 39z" fill="#F2A497" stroke="#3E3A39" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="30" cy="27" r="8" fill="#FFFCF6" stroke="#3E3A39" stroke-width="3"/>
+    </g></svg>
+  </div>
+  <div class="mapfilter" id="mapFilter" role="group" aria-label="顯示範圍"></div>
+  <div class="mapbox" id="mapBox"><p class="sub" style="padding:14px">捲動到這裡時才會載入地圖…</p></div>
+  <p class="sub" id="mapNote" style="margin-top:10px"></p>
+  <p class="priv">查詢位置時，景點名稱和住宿地址會送到 OpenStreetMap 的搜尋服務（Nominatim）。標記是約略位置，出發前請用 Google 地圖確認。</p>
+</section>
+
 <!-- ================= 待辦 ================= -->
 <section id="todo" class="card" data-sec>
-  <div class="sec-h"><h2><b>3</b>待辦清單</h2><span class="chip c-aqua" id="shareTag">與家人同步</span></div>
+  <div class="sec-h"><h2><b>4</b>待辦清單</h2><span class="chip c-aqua" id="shareTag">與家人同步</span></div>
   <div class="prog"><div class="bar"><i id="bar-todo" style="width:0%"></i></div><span id="num-todo">0/0</span></div>
   <div id="list-todo"></div>
   <div class="addrow ed"><button type="button" class="btn" data-act="l-add" data-cat="todo">＋ 新增項目</button></div>
@@ -398,7 +426,7 @@ body.lock{overflow:hidden}
 <!-- ================= 住宿 ================= -->
 <section id="stay" class="card" data-sec>
   <div class="sec-h">
-    <h2><b>4</b>住宿資訊</h2>
+    <h2><b>5</b>住宿資訊</h2>
     <svg viewBox="0 0 120 100" aria-hidden="true">
       <rect x="36" y="2" width="48" height="14" rx="7" fill="#F6D27A" stroke="#3E3A39" stroke-width="3"/>
       <path d="M46 9h28" stroke="#3E3A39" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="5 4"/>
@@ -425,12 +453,12 @@ body.lock{overflow:hidden}
     <label class="field"><span>備註</span><textarea data-info="stay_note" placeholder="例：早餐時間、寄放行李、交通怎麼走"></textarea></label>
     <a class="btn alt" id="mapBtn" href="#" target="_blank" rel="noopener" hidden>在地圖開啟</a>
   </div>
-  <p class="priv">住宿欄位只存在這支手機的瀏覽器，不會上傳同步。</p>
+  <p class="priv">住宿資料（包含訂房編號）會同步給所有家人。</p>
 </section>
 
 <!-- ================= 出發前 ================= -->
 <section id="pre" class="card" data-sec>
-  <div class="sec-h"><h2><b>5</b>出發前清單</h2><span class="chip c-aqua">與家人同步</span></div>
+  <div class="sec-h"><h2><b>6</b>出發前清單</h2><span class="chip c-aqua">與家人同步</span></div>
   <div class="prog"><div class="bar"><i id="bar-pre" style="width:0%"></i></div><span id="num-pre">0/0</span></div>
   <div id="list-pre"></div>
   <div class="addrow ed"><button type="button" class="btn" data-act="l-add" data-cat="pre">＋ 新增項目</button></div>
@@ -439,7 +467,7 @@ body.lock{overflow:hidden}
 <!-- ================= 行李 ================= -->
 <section id="pack" class="card" data-sec>
   <div class="sec-h">
-    <h2><b>6</b>行李清單</h2>
+    <h2><b>7</b>行李清單</h2>
     <svg viewBox="0 0 120 100" aria-hidden="true"><g class="s-hop">
       <path d="M44 30V18a6 6 0 0 1 6-6H70a6 6 0 0 1 6 6V30" fill="none" stroke="#3E3A39" stroke-width="3" stroke-linecap="round"/>
       <rect x="16" y="30" width="88" height="56" rx="12" fill="#F2A497" stroke="#3E3A39" stroke-width="3"/>
@@ -493,28 +521,30 @@ var K_SHARED='hk26_shared', K_LOCAL='hk26_local', K_INFO='hk26_info', K_PLAN='hk
 var TAGCLS = {'步行':'g','巴士':'g','地鐵':'a','機場快線':'a','電車':'c','的士':'c','小輪':'y','纜車':'y'};
 var DEFAULT_DAYS = [
  {d:'12/25', wd:'五', title:'抵達香港・維港夜景', note:'抵達時間依航班而定，下面的時段僅供參考。', items:[
-  {t:'依航班', h:'抵達香港國際機場', p:'入境、領行李，順便買或儲值八達通。', tags:['步行']},
-  {t:'抵達後', h:'機場快線進市區', p:'直達香港站（中環）或九龍站，再轉乘地鐵或步行到飯店。', tags:['機場快線','地鐵']},
+  {t:'依航班', h:'抵達香港國際機場', loc:'香港國際機場', p:'入境、領行李，順便買或儲值八達通。', tags:['步行']},
+  {t:'抵達後', h:'機場快線進市區', loc:'機場快線 香港站', p:'直達香港站（中環）或九龍站，再轉乘地鐵或步行到飯店。', tags:['機場快線','地鐵']},
   {t:'午後', h:'飯店寄放行李／入住', p:'還沒到入住時間可以先寄放行李，輕鬆出門。', tags:['步行']},
-  {t:'傍晚', h:'天星小輪過維港', p:'中環與尖沙咀之間的經典航線，上層看天際線最漂亮。', tags:['小輪'], must:true},
-  {t:'晚上', h:'尖沙咀海濱長廊看夜景', p:'沿海邊散步，欣賞對岸高樓的燈光。燈光秀場次出發前再確認。', tags:['步行'], must:true},
+  {t:'傍晚', h:'天星小輪過維港', loc:'天星小輪 尖沙咀碼頭', p:'中環與尖沙咀之間的經典航線，上層看天際線最漂亮。', tags:['小輪'], must:true},
+  {t:'晚上', h:'尖沙咀海濱長廊看夜景', loc:'尖沙咀海濱長廊', p:'沿海邊散步，欣賞對岸高樓的燈光。燈光秀場次出發前再確認。', tags:['步行'], must:true},
   {t:'晚餐', h:'港式燒味或茶餐廳', p:'叉燒、燒鵝、菠蘿油配奶茶，選一間排隊不會太長的。', tags:['步行']}
  ]},
  {d:'12/26', wd:'六', title:'太平山・叮叮電車・夜市', note:'週末人多，山頂纜車建議早點去。', items:[
-  {t:'上午', h:'山頂纜車登太平山', p:'搭纜車上山，在山頂看維港全景。天氣不好時視野會被雲霧遮住。', tags:['纜車'], must:true},
-  {t:'中午', h:'中環：半山電動扶梯與蘇豪', p:'沿著扶梯往上逛，蘇豪一帶午餐選擇很多。', tags:['步行','巴士']},
+  {t:'上午', h:'山頂纜車登太平山', loc:'山頂纜車 中環總站', p:'搭纜車上山，在山頂看維港全景。天氣不好時視野會被雲霧遮住。', tags:['纜車'], must:true},
+  {t:'中午', h:'中環：半山電動扶梯與蘇豪', loc:'中環半山電動扶梯', p:'沿著扶梯往上逛，蘇豪一帶午餐選擇很多。', tags:['步行','巴士']},
   {t:'下午', h:'搭叮叮電車逛港島北岸', p:'坐上層最前排視野最好；電車是統一票價，可以用八達通。', tags:['電車'], must:true},
-  {t:'傍晚', h:'銅鑼灣／灣仔逛街', p:'逛街、買伴手禮、喝杯港式奶茶休息一下。', tags:['電車','步行']},
-  {t:'晚上', h:'廟街夜市或旺角宵夜', p:'夜市攤位與小吃很多，注意隨身財物。', tags:['地鐵','步行']}
+  {t:'傍晚', h:'銅鑼灣／灣仔逛街', loc:'銅鑼灣', p:'逛街、買伴手禮、喝杯港式奶茶休息一下。', tags:['電車','步行']},
+  {t:'晚上', h:'廟街夜市或旺角宵夜', loc:'廟街夜市', p:'夜市攤位與小吃很多，注意隨身財物。', tags:['地鐵','步行']}
  ]},
  {d:'12/27', wd:'日', title:'早茶・伴手禮・回家', note:'回程當天以航班時間為準，行程盡量排輕鬆。', items:[
   {t:'上午', h:'港式早茶點心', p:'蝦餃、燒賣、腸粉、蛋撻，吃飽再出發。', tags:['步行']},
   {t:'上午', h:'退房、採買伴手禮', p:'行李先寄放在飯店或帶著走，把最後的伴手禮買齊。', tags:['地鐵','步行']},
-  {t:'依航班', h:'前往機場', p:'建議提早 2～3 小時抵達機場（以航空公司規定為準）。', tags:['機場快線']},
+  {t:'依航班', h:'前往機場', loc:'香港國際機場', p:'建議提早 2～3 小時抵達機場（以航空公司規定為準）。', tags:['機場快線']},
   {t:'依航班', h:'搭機返家', p:'檢查護照、登機證，再看一眼維港，下次見。', tags:[]}
  ]}
 ];
 var DAYS = JSON.parse(JSON.stringify(DEFAULT_DAYS));
+var DEFAULT_LOC = {};
+DEFAULT_DAYS.forEach(function(d){ d.items.forEach(function(it){ if(it.loc) DEFAULT_LOC[it.h]=it.loc; }); });
 var TODO = [
  {k:'todo-flight', t:'訂好機票，並和家人確認同一班'},
  {k:'todo-hotel',  t:'訂好住宿'},
@@ -546,7 +576,8 @@ function load(k){ try{ return JSON.parse(localStorage.getItem(k)||'{}')||{}; }ca
 function save(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 var shared = load(K_SHARED);   // {key:{checked,updatedAt}}  會同步
 var local  = load(K_LOCAL);    // {key:bool}                 只存本機
-var info   = load(K_INFO);     // {field:value}              只存本機
+var info   = load(K_INFO);     // {field:value}              航班／住宿欄位（訂房編號除外會同步）
+var K_INFOT='hk26_infot', infoT=load(K_INFOT);   // {field:updatedAt}
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -601,14 +632,16 @@ function renderTabs(){
     return '<button class="tab" role="tab" type="button" data-i="'+i+'" aria-selected="'+(i===cur)+'" tabindex="'+(i===cur?0:-1)+'"><small>Day '+(i+1)+'</small><b>'+d.d+'</b><small>週'+d.wd+'</small></button>';
   }).join('');
 }
-function renderDay(animate){
+function renderDay(animate){ renderDayCore(animate); mapRefresh(); }
+function renderDayCore(animate){
   var d=DAYS[cur];
   $('dayTitle').textContent='Day '+(cur+1)+(d.title?'・'+d.title:'');
   $('dayNote').textContent=d.note||'';
   var tl=$('tl');
   if(!d.items.length){ tl.innerHTML='<li class="ti" style="--i:0"><div class="tb"><p>這一天還沒有行程，請到試算表的「plan」分頁新增。</p></div></li>'; if(animate){ tl.classList.remove('pop'); void tl.offsetWidth; tl.classList.add('pop'); } return; }
   tl.innerHTML=d.items.map(function(it,i){
-    var tags=(it.tags||[]).map(function(t){ return '<span class="tag '+(TAGCLS[t]||'g')+'">'+esc(t)+'</span>'; }).join('');
+    var tags=(it.tags||[]).map(function(t){ return '<span class="tag '+(TAGCLS[t]||'g')+'">'+esc(t)+'</span>'; }).join('')
+      +(it.loc?'<a class="tag m" href="'+esc(gmapsUrl(it.loc))+'" target="_blank" rel="noopener">地圖 ↗</a>':'');
     return '<li class="ti" style="--i:'+i+'"><div class="tb'+(it.must?' must':'')+'">'
       +'<div class="tr"><span class="time">'+esc(it.t)+'</span>'+(it.must?'<span class="must-b">必去</span>':'')+'</div>'
       +'<h4>'+esc(it.h)+'</h4><p>'+esc(it.p)+'</p>'
@@ -697,13 +730,17 @@ function updateMap(){
 }
 document.addEventListener('input',function(e){
   var f=e.target; if(!f.dataset||!f.dataset.info) return;
-  info[f.dataset.info]=f.value; save(K_INFO,info); updateMap();
+  var k=f.dataset.info;
+  info[k]=f.value; save(K_INFO,info); updateMap(); if(k==='stay_addr'||k==='stay_name') mapRefresh();
+  if(SYNC_KEYS.indexOf(k)>-1){ infoT[k]=Date.now(); save(K_INFOT,infoT); pend.info=++pend.v; savePend(); clearTimeout(infoTimer); infoTimer=setTimeout(function(){ flushPending().catch(function(){ setPill('off','變更尚未上傳'); }); },1200); }
 });
 updateMap();
 
 
 /* ======== 行程同步（試算表 plan / days 分頁） ======== */
+function planHasLoc(remote){ return (remote.rows||[]).some(function(r){ return String(r[6]||'').trim(); }); }
 function buildDays(remote){
+  var infer=!planHasLoc(remote);   // 舊資料沒有「地點」欄：先用預設景點補上
   var out=DEFAULT_DAYS.map(function(d){ return {d:d.d,wd:d.wd,title:'',note:'',items:[]}; });
   (remote.days||[]).forEach(function(r){
     var i=parseInt(r[0],10)-1; if(i>=0&&i<out.length){ out[i].title=String(r[1]||'').trim(); out[i].note=String(r[2]||'').trim(); }
@@ -713,7 +750,8 @@ function buildDays(remote){
     var h=String(r[2]||'').trim(); if(!h) return;
     var must=/^(y|yes|true|1|是|必去|v|✓)$/i.test(String(r[5]||'').trim());
     out[i].items.push({t:String(r[1]||'').trim(),h:h,p:String(r[3]||'').trim(),
-      tags:String(r[4]||'').split(/[,，、\s]+/).filter(Boolean),must:must});
+      tags:String(r[4]||'').split(/[,，、\s]+/).filter(Boolean),must:must,
+      loc:String(r[6]||'').trim()||(infer?(DEFAULT_LOC[h]||''):'')});
   });
   return out;
 }
@@ -721,13 +759,15 @@ function applyPlan(res){
   var remote={days:res.days||[],rows:res.rows||[]};
   var sig=JSON.stringify(remote);
   if(sig===JSON.stringify(load(K_PLAN))) return;
+  var migrate=remote.rows.length>0&&!planHasLoc(remote);
   save(K_PLAN,remote); DAYS=buildDays(remote); renderTabs(); renderDay(false);
+  if(migrate&&typeof markAllPending==='function') markAllPending();   // 一次性：把補上的地點寫回試算表
 }
 function seedBody(){
   var days=[],rows=[];
   DEFAULT_DAYS.forEach(function(d,i){
     days.push([i+1,d.title,d.note]);
-    d.items.forEach(function(it){ rows.push([i+1,it.t,it.h,it.p,(it.tags||[]).join('、'),it.must?'Y':'']); });
+    d.items.forEach(function(it){ rows.push([i+1,it.t,it.h,it.p,(it.tags||[]).join('、'),it.must?'Y':'',it.loc||'']); });
   });
   return {action:'seedPlan',days:days,rows:rows};
 }
@@ -766,6 +806,7 @@ function getPlan(){
 }
 function applyRemote(res){
   var f=res.seeded||{};
+  if(res.info) applyInfo(res.info);
   if(res.rows.length||(res.days&&res.days.length)||f.plan) applyPlan(res);
   if(Array.isArray(res.lists)&&(res.lists.length||f.lists)) applyLists(res.lists);
 }
@@ -786,12 +827,136 @@ function fetchPlan(){
 })();
 
 
+
+/* ======== 地圖（Leaflet + OpenStreetMap） ======== */
+var PLACE_HINTS={
+  '香港國際機場':[22.3089,113.9144],
+  '機場快線 香港站':[22.2848,114.1580],
+  '天星小輪 尖沙咀碼頭':[22.2940,114.1686],
+  '尖沙咀海濱長廊':[22.2930,114.1742],
+  '山頂纜車 中環總站':[22.2777,114.1592],
+  '中環半山電動扶梯':[22.2837,114.1548],
+  '銅鑼灣':[22.2802,114.1835],
+  '廟街夜市':[22.3059,114.1699]
+};
+var K_GEO='hk26_geo', geo=load(K_GEO), geoTried={}, geoQ=[], geoBusy=false;
+var LMAP=null, MLAYER=null, mapDay='all', mapWanted=false, mapLoading=false, mapTimer=null, mapSig='';
+var REDUCE=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function parseLL(t){
+  var m=/^\s*(-?\d{1,3}(?:\.\d+)?)\s*[,，\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(t||''); if(!m) return null;
+  var a=+m[1], b=+m[2]; return (Math.abs(a)<=90&&Math.abs(b)<=180)?[a,b]:null;
+}
+function gmapsUrl(loc){
+  var ll=parseLL(loc), q=ll?ll.join(','):(/香港|hong\s*kong/i.test(loc)?loc:loc+' 香港');
+  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+}
+// 回傳座標陣列；false = 查過但找不到；undefined = 還沒查
+function llOf(text){
+  text=(text||'').trim(); if(!text) return false;
+  var p=parseLL(text); if(p) return p;
+  if(PLACE_HINTS[text]) return PLACE_HINTS[text];
+  if(geo[text]) return geo[text];
+  if(geo[text]===0) return false;
+  return undefined;
+}
+function queueGeo(t){ geoQ.push(t); runGeo(); }
+function runGeo(){
+  if(geoBusy||!geoQ.length) return;
+  geoBusy=true; var t=geoQ.shift();
+  fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=hk&accept-language=zh-TW&q='+encodeURIComponent(t))
+  .then(function(r){ if(!r.ok) throw new Error('http'); return r.json(); })
+  .then(function(a){ geo[t]=(a&&a[0])?[+(+a[0].lat).toFixed(5),+(+a[0].lon).toFixed(5)]:0; save(K_GEO,geo); })
+  .catch(function(){})                                   // 網路失敗：這次不記錄，下次開啟頁面再試
+  .then(function(){ setTimeout(function(){ geoBusy=false; mapRefresh(); runGeo(); },1100); });  // 服務限制每秒 1 次
+}
+function mapPoints(){
+  var pts=[], pending=[], missing=[], hotel=null;
+  DAYS.forEach(function(d,di){
+    var n=0;
+    d.items.forEach(function(it){
+      var loc=(it.loc||'').trim(); if(!loc) return;
+      var ll=llOf(loc);
+      if(ll){ n++; pts.push({day:di,n:n,name:it.h,time:it.t,loc:loc,ll:ll}); }
+      else if(ll===false) missing.push(it.h);
+      else pending.push(loc);
+    });
+  });
+  var hq=(info.stay_addr||info.stay_name||'').trim();
+  if(hq){ var hl=llOf(hq); if(hl) hotel={name:info.stay_name||hq,loc:hq,ll:hl}; else if(hl===false) missing.push('住宿'); else pending.push(hq); }
+  return {pts:pts,hotel:hotel,pending:pending,missing:missing};
+}
+function renderMapFilter(){
+  var opts=[['all','全部']].concat(DAYS.map(function(d,i){ return [String(i),'Day '+(i+1)]; }));
+  $('mapFilter').innerHTML=opts.map(function(o){
+    return '<button type="button" class="mf" data-d="'+o[0]+'" aria-pressed="'+(mapDay===o[0])+'">'+o[1]+'</button>';
+  }).join('');
+}
+$('mapFilter').addEventListener('click',function(e){
+  var b=e.target.closest('.mf'); if(!b) return; mapDay=b.dataset.d; renderMapFilter(); mapSig=''; mapRefresh();
+});
+function mapRefresh(){ if(!mapWanted||!LMAP) return; clearTimeout(mapTimer); mapTimer=setTimeout(drawMap,150); }
+function pinIcon(cls,label){
+  return L.divIcon({className:'',html:'<div class="pin '+cls+'"><span>'+esc(label)+'</span></div>',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-16]});
+}
+function drawMap(){
+  if(!LMAP) return;
+  var m=mapPoints();
+  m.pending.forEach(function(t){ if(!geoTried[t]){ geoTried[t]=1; queueGeo(t); } });
+  var show=m.pts.filter(function(p){ return mapDay==='all'||String(p.day)===mapDay; });
+  var sig=JSON.stringify([mapDay,show.map(function(p){ return [p.day,p.n,p.name,p.ll]; }),m.hotel&&[m.hotel.name,m.hotel.ll]]);
+  var note=$('mapNote');
+  var msg=[];
+  if(m.pending.length||geoQ.length||geoBusy) msg.push('正在查詢位置…');
+  if(m.missing.length) msg.push('找不到位置：'+m.missing.join('、')+'。請在景點的「地點」欄改填更精確的名稱，或直接填座標（例如 22.2940,114.1686）。');
+  if(!show.length&&!m.hotel&&!m.pending.length&&!m.missing.length) msg.push('還沒有可顯示的地點。編輯景點時填寫「地點」，就會出現在地圖上。');
+  note.textContent=msg.join(' ');
+  if(sig===mapSig) return; mapSig=sig;
+  MLAYER.clearLayers();
+  var bounds=[];
+  show.forEach(function(p){
+    var html='<b>'+esc(p.name)+'</b><br>Day '+(p.day+1)+(p.time?'・'+esc(p.time):'')+'<br><a href="'+esc(gmapsUrl(p.loc))+'" target="_blank" rel="noopener">在 Google 地圖開啟</a>';
+    L.marker(p.ll,{icon:pinIcon('d'+(p.day+1),p.n),title:p.name}).bindPopup(html).addTo(MLAYER); bounds.push(p.ll);
+  });
+  if(m.hotel){
+    var hh='<b>'+esc(m.hotel.name)+'</b><br>住宿<br><a href="'+esc(gmapsUrl(m.hotel.loc))+'" target="_blank" rel="noopener">在 Google 地圖開啟</a>';
+    L.marker(m.hotel.ll,{icon:pinIcon('h','宿'),title:'住宿',zIndexOffset:500}).bindPopup(hh).addTo(MLAYER); bounds.push(m.hotel.ll);
+  }
+  LMAP.invalidateSize();
+  if(bounds.length>1) LMAP.fitBounds(bounds,{padding:[30,30],maxZoom:16,animate:!REDUCE});
+  else if(bounds.length===1) LMAP.setView(bounds[0],15,{animate:!REDUCE});
+  else LMAP.setView([22.30,114.17],11,{animate:!REDUCE});
+}
+function loadLeaflet(cb){
+  if(window.L) return cb(true);
+  var css=document.createElement('link'); css.rel='stylesheet'; css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(css);
+  var sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+  sc.onload=function(){ cb(!!window.L); }; sc.onerror=function(){ cb(false); }; document.head.appendChild(sc);
+}
+function initMap(){
+  if(LMAP||mapLoading) return; mapLoading=true;
+  loadLeaflet(function(ok){
+    mapLoading=false;
+    if(!ok){ $('mapBox').innerHTML='<p class="sub" style="padding:14px">地圖需要網路才能載入，連線後再回到這裡看看。</p>'; return; }
+    $('mapBox').innerHTML='';
+    LMAP=L.map('mapBox',{zoomAnimation:!REDUCE,fadeAnimation:!REDUCE,markerZoomAnimation:!REDUCE,inertia:!REDUCE});
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(LMAP);
+    MLAYER=L.layerGroup().addTo(LMAP);
+    LMAP.setView([22.30,114.17],11);
+    mapSig=''; drawMap();
+  });
+}
+renderMapFilter();
+if('IntersectionObserver' in window){
+  new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ mapWanted=true; initMap(); } }); },{rootMargin:'300px 0px'}).observe($('map'));
+}else{ mapWanted=true; initMap(); }
+
 /* ======== 編輯功能 ======== */
 var TAGS=['步行','地鐵','電車','小輪','纜車','巴士','機場快線','的士'];
 var K_PEND='hk26_pend';
 var pend=load(K_PEND); if(!pend.plan) pend.plan={}; if(!pend.v) pend.v=0;
 function savePend(){ save(K_PEND,pend); }
-function hasPending(){ return !!pend.lists||Object.keys(pend.plan).length>0; }
+function hasPending(){ return !!pend.lists||!!pend.info||Object.keys(pend.plan).length>0; }
 var toastT;
 function toast(t){ var el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove('show'); },2600); }
 
@@ -799,7 +964,7 @@ function daysToRemote(){
   var days=[],rows=[];
   DAYS.forEach(function(d,i){
     days.push([String(i+1),d.title||'',d.note||'']);
-    d.items.forEach(function(it){ rows.push([String(i+1),it.t,it.h,it.p,(it.tags||[]).join('、'),it.must?'Y':'']); });
+    d.items.forEach(function(it){ rows.push([String(i+1),it.t,it.h,it.p,(it.tags||[]).join('、'),it.must?'Y':'',it.loc||'']); });
   });
   return {days:days,rows:rows};
 }
@@ -818,13 +983,19 @@ function flushPending(){
   Object.keys(pend.plan).forEach(function(day){
     var ver=pend.plan[day], d=DAYS[day-1]; if(!d){ delete pend.plan[day]; return; }
     jobs.push(post({action:'savePlan',day:+day,title:d.title||'',note:d.note||'',
-      rows:d.items.map(function(it){ return [it.t,it.h,it.p,(it.tags||[]).join('、'),it.must?'Y':'']; })})
+      rows:d.items.map(function(it){ return [it.t,it.h,it.p,(it.tags||[]).join('、'),it.must?'Y':'',it.loc||'']; })})
       .then(function(r){ if(!r.ok) throw new Error('http'); if(pend.plan[day]===ver){ delete pend.plan[day]; savePend(); } }));
   });
   if(pend.lists){
     var lv=pend.lists;
     jobs.push(post({action:'saveLists',rows:listsToRows()})
       .then(function(r){ if(!r.ok) throw new Error('http'); if(pend.lists===lv){ delete pend.lists; savePend(); } }));
+  }
+  if(pend.info){
+    var iv=pend.info, fields={};
+    SYNC_KEYS.forEach(function(k){ if(infoT[k]) fields[k]=[info[k]||'',infoT[k]]; });
+    jobs.push(post({action:'saveInfo',fields:fields})
+      .then(function(r){ if(!r.ok) throw new Error('http'); if(pend.info===iv){ delete pend.info; savePend(); } }));
   }
   if(!jobs.length) return Promise.resolve();
   flushing=Promise.all(jobs).then(function(){ flushing=null; },function(e){ flushing=null; throw e; });
@@ -833,6 +1004,11 @@ function flushPending(){
 function afterEdit(){
   if(!SYNC_URL){ toast('已儲存在這支手機'); return; }
   flushPending().then(function(){ toast('已儲存並同步'); }).catch(function(){ toast('已存在這支手機，連線後會自動上傳'); setPill('off','變更尚未上傳'); });
+}
+function markAllPending(){
+  save(K_PLAN,daysToRemote());
+  DAYS.forEach(function(d,i){ pend.plan[i+1]=++pend.v; }); savePend();
+  flushPending().catch(function(){});
 }
 function persistPlan(day){ save(K_PLAN,daysToRemote()); pend.plan[day+1]=++pend.v; savePend(); afterEdit(); }
 function persistLists(){ save(K_LISTS,{rows:listsToRows()}); pend.lists=++pend.v; savePend(); afterEdit(); }
@@ -886,10 +1062,11 @@ function editItem(i){
     {n:'t',label:'時間',v:it.t,ph:'例：上午、14:00、依航班'},
     {n:'h',label:'標題',v:it.h,req:true,ph:'景點名稱'},
     {n:'p',label:'說明',v:it.p,type:'area',ph:'一兩句簡介'},
+    {n:'loc',label:'地點（選填，用來顯示地圖）',v:it.loc||'',ph:'例：天星小輪 尖沙咀碼頭，或座標 22.2940,114.1686'},
     {n:'tags',label:'交通',type:'tags',opts:TAGS.concat(extra),v:it.tags||[]},
     {n:'must',label:'必去',type:'check',v:!!it.must}
   ],function(v){
-    var o={t:v.t.trim(),h:v.h.trim(),p:v.p.trim(),tags:v.tags,must:v.must};
+    var o={t:v.t.trim(),h:v.h.trim(),p:v.p.trim(),tags:v.tags,must:v.must,loc:v.loc.trim()};
     if(i>=0) DAYS[day].items[i]=o; else DAYS[day].items.push(o);
     renderDay(false); persistPlan(day);
   }, i>=0?del:null);
@@ -963,6 +1140,35 @@ $('editBtn').addEventListener('click',function(){
   this.textContent=on?'完成':'✎ 編輯'; this.setAttribute('aria-pressed',on?'true':'false'); setNavH();
 });
 
+
+/* ======== 航班／住宿同步 ======== */
+var SYNC_KEYS=['out_from','out_to','out_dep','out_arr','out_air','out_no','back_from','back_to','back_dep','back_arr','back_air','back_no',
+               'stay_name','stay_addr','stay_in','stay_out','stay_no','stay_tel','stay_note'];
+var infoTimer=null, DEFAULT_INFO={out_to:'HKG 香港',back_from:'HKG 香港'};
+function applyInfo(remote){
+  var changed=false;
+  Object.keys(remote||{}).forEach(function(k){
+    if(SYNC_KEYS.indexOf(k)<0) return;
+    var r=remote[k]; if(!r||typeof r[1]!=='number') return;
+    if(r[1]>(infoT[k]||0)){
+      info[k]=String(r[0]); infoT[k]=r[1]; changed=true;
+      var el=document.querySelector('[data-info="'+k+'"]');
+      if(el&&document.activeElement!==el) el.value=info[k];
+    }
+  });
+  if(changed){ save(K_INFO,info); save(K_INFOT,infoT); updateMap(); mapRefresh(); }
+}
+// 一次性：更新前就已填在這支手機的資料，補上時間戳並上傳
+function migrateInfo(){
+  var any=false;
+  SYNC_KEYS.forEach(function(k){
+    var v=info[k]; if(v===undefined||v===''||infoT[k]) return;
+    if(DEFAULT_INFO[k]===v) return;
+    infoT[k]=Date.now(); any=true;
+  });
+  if(any){ save(K_INFOT,infoT); pend.info=++pend.v; savePend(); }
+}
+
 /* ======== 同步（Apps Script） ======== */
 var pill=$('pill'), syncing=false, dirty=false, timer=null;
 function setPill(state,txt){ pill.className='pill '+state; pill.textContent=txt; setNavH(); }
@@ -992,6 +1198,7 @@ document.addEventListener('visibilitychange',function(){ if(!document.hidden) sy
 window.addEventListener('online',sync);
 window.addEventListener('offline',function(){ setPill('off','離線，稍後同步'); });
 setInterval(function(){ if(!document.hidden) sync(); },30000);
+migrateInfo();
 if(SYNC_URL){ setPill('busy','同步中…'); sync(); } else { setPill('local','僅存本機'); }
 
 /* ======== 備份 ======== */
